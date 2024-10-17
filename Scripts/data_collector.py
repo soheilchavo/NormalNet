@@ -1,6 +1,7 @@
 import os
 import requests
 
+#Get CSV for list of datapoints in datasets
 def data_info_request(url, output_directory, print_result : bool = False):
     response = requests.get(url)
     open(output_directory, "wb").write(response.content)
@@ -9,20 +10,17 @@ def data_info_request(url, output_directory, print_result : bool = False):
 
 def download_dataset(data_info_path : str, data_file_path : str, data_filter : list[str]):
     if os.path.isfile(data_info_path):
-        try:
-            data_info = open(data_info_path, "rb")
-            for i, line in enumerate(data_info):
-                if i == 3:
-                    return
-                if i != 0:
-                    line_string = str(line,'utf-8')
-                    line_array = line_string.split(",")
-                    if line_array[1] in data_filter:
-                        link = line_array[4]
-                        mirror_link = line_array[5]
-                        download_datapoint(link, data_file_path, f"{line_array[0]}-{line_array[3]}", mirror_link)
-        except:
-            raise Exception("Data info file does not exist or its formatting or is corrupted.")
+        data_info = open(data_info_path, "rb")
+        for i, line in enumerate(data_info):
+            if i == 3:
+                return
+            if i != 0: #Skip first line of CSV, the header
+                line_string = str(line,'utf-8')
+                line_array = line_string.split(",")
+                if line_array[1] in data_filter:
+                    link = line_array[4]
+                    mirror_link = line_array[5]
+                    download_datapoint(link, data_file_path, f"{line_array[0]}-{line_array[3]}", mirror_link)
     else:
         raise Exception("Data info file not included, run data_info_request() first.")
 
