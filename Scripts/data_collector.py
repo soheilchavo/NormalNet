@@ -3,16 +3,18 @@ import requests
 
 #Get CSV for list of datapoints in datasets
 def data_info_request(url, output_directory, print_result : bool = False):
+    print(f"Requesting data from {url}")
     response = requests.get(url)
     open(output_directory, "wb").write(response.content)
+    print(f"Successful request, Data stored in {output_directory}")
     if print_result:
         print(response.text)
 
-def download_dataset(data_info_path : str, data_file_path : str, data_filter : list[str]):
+def download_dataset(data_info_path : str, data_file_path : str, data_filter : list[str], num_data_points=-1):
     if os.path.isfile(data_info_path):
         data_info = open(data_info_path, "rb")
         for i, line in enumerate(data_info):
-            if i == 3:
+            if i >= num_data_points: #If we've reached the cap on the number of datapoints we want to download
                 return
             if i != 0: #Skip first line of CSV, the header
                 line_string = str(line,'utf-8')
