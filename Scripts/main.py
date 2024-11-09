@@ -20,6 +20,8 @@ data_heading = "downloadAttribute"
 
 data_folders = ["AmbientOcclusion", "Color", "NormalDX", "NormalGL", "Roughness"]
 
+training_dataset_loader, testing_dataset_loader = None, None
+
 #Download and filter dataset
 # data_info_request(url=training_data_info_url, output_directory=training_data_info_output)
 # delete_duplicate_rows(csv_file_path=training_data_info_output)
@@ -29,4 +31,4 @@ data_folders = ["AmbientOcclusion", "Color", "NormalDX", "NormalGL", "Roughness"
 
 #Extract dataset to different folders
 # extract_dataset("Data/TrainingImages/TrainingRawData", "Data/TrainingImages", data_folders)
-normalize_data("Data/TrainingImages")
+# dataset = normalize_data("Data/TrainingImages")

@@ -36,4 +36,4 @@ def normalize_data(dataset_path : str):
     ])
 
     dataset = datasets.ImageFolder(dataset_path, transform=data_transforms)
-    return dataset
+    return dataset, loader
