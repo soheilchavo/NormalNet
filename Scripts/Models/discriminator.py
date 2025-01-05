@@ -1,17 +1,27 @@
 import torch
 from torch import nn
 
-class UNet(torch.nn.Module):
+class DiscriminatorCNN(torch.nn.Module):
     def __init__(self, n_channels):
-        super(UNet, self).__init__()
+        super(DiscriminatorCNN, self).__init__()
         self.predict = nn.Sequential(
-            nn.Conv2d(n_channels, 64, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Linear(64 * 4 * 4, 512),
+
+            nn.Conv2d(n_channels, 64, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Flatten(),
+            nn.Linear(128*128*256, 1),
             nn.Sigmoid()
         )
 
     def forward(self, x):
-        return self.predict(x)
+        x2 = self.predict(x).view(-1)
+        return x2
