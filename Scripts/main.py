@@ -18,6 +18,7 @@ from Data_Collection.data_normalization import normalize_data
 from Models.generator import UNet
 from Models.discriminator import DiscriminatorCNN
 from train import train_models
+from test import single_pass
 
 #URL's and output directories for getting training and testing data (CSV of all materials and download links)
 training_data_info_url = "https://ambientCG.com/api/v2/downloads_csv?method=PBRPhotogrammetry&type=Material&sort=Popular"
@@ -46,6 +47,9 @@ discriminator_lr = 0.0002
 beta1 = 0.5
 beta2 = 0.999
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+dataset_mean, dataset_std = 0, 0
+
 if __name__ == '__main__':
 
     #Download and filter dataset
@@ -60,30 +64,40 @@ if __name__ == '__main__':
 
     # paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/NormalDX", "Color_", "NormalDX_")
     #
-    # normalized_data = normalize_data(paired_dataset)
+    # normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
     #
     # with open('TrainingData', 'wb') as f:
     #     pickle.dump(normalized_data, f)
-
+    #
+    # with open('TrainingDatsetInfo', 'wb') as f:
+    #     pickle.dump([dataset_mean, dataset_std], f)
+    #
     with open('TrainingData', 'rb') as f:
         dataset = pickle.load(f)
 
+    with open('TrainingDatsetInfo', 'rb') as f:
+        values = pickle.load(f)
+
+    dataset_mean = values[0]
+    dataset_std = values[1]
+
     loader = DataLoader(dataset, shuffle=True)
+    print(dataset_mean, dataset_std)
     #
     # generator = UNet(3) #3 Channels for RGB
     # discriminator = DiscriminatorCNN(3) #3 Channels for RGB
     #
-    # total_params_g = sum(p.numel() for p in generator.parameters() if p.requires_grad)
-    # total_params_d = sum(p.numel() for p in discriminator.parameters() if p.requires_grad)
-    #
     # generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
     # discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
     #
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, log_interval=1)
     #
     # torch.save(generator, "Generator.pt")
     # torch.save(discriminator, "Discriminator.pt")
 
-    generator = torch.load("Generator.pt").to(device)
+    sample = next(iter(loader))[0]
+
+    generator = torch.load("Generator.pt")
+    single_pass(model=generator, input_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, print_tensor=True, display_sample=True)
+
 

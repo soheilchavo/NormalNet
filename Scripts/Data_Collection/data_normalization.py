@@ -27,4 +27,7 @@ def normalize_data(dataset):
     for datapoint in dataset:
         normalized_dataset.append([transform1(datapoint[0]), transform1(datapoint[1])])
 
-    return normalized_dataset
+    return normalized_dataset, mean, std
+
+def unnormalize_tensor(sample, mean, std):
+    return sample * std + mean
