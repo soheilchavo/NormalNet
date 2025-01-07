@@ -7,8 +7,8 @@ def normalize_data(dataset):
     std = 0.0
 
     for datapoint in dataset:
-        datapoint[0] = datapoint[0].float()
-        datapoint[1] = datapoint[1].float()
+        datapoint[0] = datapoint[0].float() / 255
+        datapoint[1] = datapoint[1].float() / 255
         mean += datapoint[0].mean() + datapoint[1].mean()
         std += datapoint[0].std() + datapoint[1].std()
 
@@ -19,7 +19,7 @@ def normalize_data(dataset):
         transforms.ToPILImage(),
         transforms.Resize((1024,1024)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=mean, std=std)
+        transforms.Normalize(mean=mean, std=std),
     ])
 
     normalized_dataset = []

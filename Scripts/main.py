@@ -3,7 +3,13 @@
 import os.path
 
 import torch.optim
+import pickle
+
+from fontTools.merge.util import first
 from torch.utils.data import DataLoader
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 from Data_Collection.data_collector import data_info_request, download_dataset
 from Data_Collection.data_filtering import delete_duplicate_rows, filter_data, extract_dataset, pair_datapoints
@@ -32,8 +38,13 @@ num_data_points = 100
 
 training_dataset_loader, testing_dataset_loader = None, None
 
-epochs = 1
+epochs = 5
 batch_size = 5
+
+generator_lr = 0.0002
+discriminator_lr = 0.0002
+beta1 = 0.5
+beta2 = 0.999
 
 if __name__ == '__main__':
 
@@ -48,17 +59,26 @@ if __name__ == '__main__':
     # extract_dataset("Data/TrainingRawData", "Data/TrainingImages")
     #
     # paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/NormalDX", "Color_", "NormalDX_")
-
+    #
     # normalized_data = normalize_data(paired_dataset)
-    # torch.save(paired_dataset, "Data/TrainingData.pt")
+    #
+    # plt.imshow(normalized_data[0][0].permute(1,2,0).numpy())
+    # plt.show()
+    #
+    #
+    # with open('TrainingData', 'wb') as f:
+    #     pickle.dump(normalized_data, f)
 
-    dataset = torch.load("Data/TrainingData.pt")
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    with open('TrainingData', 'rb') as f:
+        dataset = pickle.load(f)
+
+    loader = DataLoader(dataset, shuffle=True)
+    first_sample = next(iter(loader))
 
     generator = UNet(3) #3 Channels for RGB
     discriminator = DiscriminatorCNN(3) #3 Channels for RGB
 
-    generator_optim = torch.optim.Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
-    discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=0.0002, betas=(0.5, 0.999))
+    generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
+    discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
 
-    train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, log_interval=10)
+    train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, log_interval=1)

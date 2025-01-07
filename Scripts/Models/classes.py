@@ -25,14 +25,15 @@ class DownConv(nn.Module):
         )
     def forward(self, x):
         x2 = self.conv(x)
-        return self.conv(x2)
+        return x2
 
 class UpConv(torch.nn.Module):
     def __init__(self, in_channels, out_channels):
         super(UpConv, self).__init__()
         self.transpose_conv = torch.nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
         self.double_conv = DoubleConv(out_channels*2, out_channels)
-    def forward(self, x, x2):
-        x3 = self.transpose_conv(x)
-        x4 = torch.cat([x3, x2], dim=1)
-        return self.double_conv(x4)
+    def forward(self, x, y):
+        x2 = self.transpose_conv(x)
+        x3 = torch.cat([x2, y], dim=1)
+        out = self.double_conv(x3)
+        return out

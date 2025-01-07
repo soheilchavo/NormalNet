@@ -32,6 +32,6 @@ class UNet(torch.nn.Module):
         x8 = self.up3(x7, x2)
         x9 = self.up4(x8, x1)
 
-        x10 = self.final_conv(x9)
-        # x10 = nn.functional.conv2d(x9, self.final_conv.weight.clone(), self.final_conv.bias)
+        # x10 = self.final_conv(x9)
+        x10 = nn.functional.conv2d(x9, self.final_conv.weight.clone(), self.final_conv.bias)
         return x10
