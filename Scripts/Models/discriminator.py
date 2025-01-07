@@ -13,12 +13,8 @@ class DiscriminatorCNN(torch.nn.Module):
             nn.BatchNorm2d(128),
             nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(256),
-            nn.LeakyReLU(0.2, inplace=True),
-
             nn.Flatten(),
-            nn.Linear(128*128*256, 1),
+            nn.Linear(128*64*64, 1),
             nn.Sigmoid()
         )
 

@@ -17,7 +17,7 @@ def normalize_data(dataset):
 
     transform1 = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Resize((1024,1024)),
+        transforms.Resize((256,256)),
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=std),
     ])

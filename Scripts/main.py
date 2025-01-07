@@ -38,7 +38,7 @@ num_data_points = 100
 
 training_dataset_loader, testing_dataset_loader = None, None
 
-epochs = 5
+epochs = 1
 batch_size = 5
 
 generator_lr = 0.0002
@@ -50,21 +50,17 @@ if __name__ == '__main__':
 
     #Download and filter dataset
     # data_info_request(url=training_data_info_url, output_directory=training_data_info_output)
+
     # delete_duplicate_rows(csv_file_path=training_data_info_output)
     # filter_data(csv_file_path=training_data_info_output, data_heading=data_heading, data_filter=data_filter)
 
     # download_dataset(data_info_path=training_data_info_output, data_file_path=training_data_path, data_filter = data_filter, num_data_points=num_data_points)
 
-    #Extract dataset to different folders
     # extract_dataset("Data/TrainingRawData", "Data/TrainingImages")
-    #
+
     # paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/NormalDX", "Color_", "NormalDX_")
     #
     # normalized_data = normalize_data(paired_dataset)
-    #
-    # plt.imshow(normalized_data[0][0].permute(1,2,0).numpy())
-    # plt.show()
-    #
     #
     # with open('TrainingData', 'wb') as f:
     #     pickle.dump(normalized_data, f)
@@ -73,12 +69,21 @@ if __name__ == '__main__':
         dataset = pickle.load(f)
 
     loader = DataLoader(dataset, shuffle=True)
-    first_sample = next(iter(loader))
+    #
+    # generator = UNet(3) #3 Channels for RGB
+    # discriminator = DiscriminatorCNN(3) #3 Channels for RGB
+    #
+    # total_params_g = sum(p.numel() for p in generator.parameters() if p.requires_grad)
+    # total_params_d = sum(p.numel() for p in discriminator.parameters() if p.requires_grad)
+    #
+    # generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
+    # discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
+    #
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, log_interval=1)
+    #
+    # torch.save(generator, "Generator.pt")
+    # torch.save(discriminator, "Discriminator.pt")
 
-    generator = UNet(3) #3 Channels for RGB
-    discriminator = DiscriminatorCNN(3) #3 Channels for RGB
+    generator = torch.load("Generator.pt").to(device)
 
-    generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
-    discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
-
-    train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, log_interval=1)

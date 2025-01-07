@@ -33,6 +33,8 @@ def extract_maps(zip_path : str, folder_base_path : str, idx: int):
                 os.rename(f"{new_filepath}/{name}", f"{new_filepath}/{file_type}_{idx}.png")
             except ValueError:
                 pass
+            except FileExistsError:
+                pass
 
 def extract_dataset(dataset_path: str, output_path : str):
     for idx, filename in enumerate(os.listdir(dataset_path)):
