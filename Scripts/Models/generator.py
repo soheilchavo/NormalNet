@@ -18,12 +18,13 @@ class UNet(torch.nn.Module):
 
     def forward(self, x):
         x1 = self.initial_conv(x)
+
         x2 = self.down1(x1)
         x3 = self.down2(x2)
 
         x4 = self.up1(x3, x2)
-        x5 = self.up2(x4, x1)
+        x6 = self.up2(x4, x1)
 
-        x6 = self.final_conv(x5)
+        x7 = self.final_conv(x6)
 
-        return x6
+        return x7
