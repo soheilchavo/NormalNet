@@ -39,3 +39,5 @@ def train_models(epochs, gen, disc, loader, loss_function, disc_optim, gen_optim
                 print(f"Batch [{batch_idx}/{len(loader)}] "
                       f"Loss_D: {loss_d:.4f} "
                       f"Loss_G: {loss_g:.4f}")
+
+    print("\nTraining Finished.")

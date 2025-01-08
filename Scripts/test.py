@@ -18,6 +18,7 @@ def single_pass(model, input_tensor, device, dataset_mean=0, dataset_std=0, disp
 
     if display_sample:
         input_tensor = input_tensor.squeeze(0)
+        input_tensor = input_tensor.to(torch.device("cpu"))
         img = input_tensor.detach()
         img = unnormalize_tensor(img, dataset_mean, dataset_std)
         img = img.clip(0, 1)
@@ -27,6 +28,7 @@ def single_pass(model, input_tensor, device, dataset_mean=0, dataset_std=0, disp
 
     if display_plot:
         img = result.detach()
+        img = img.to(torch.device("cpu"))
         img = unnormalize_tensor(img, dataset_mean, dataset_std)
         img = img.clip(0, 1)
         plt.imshow(img.permute(1, 2, 0))

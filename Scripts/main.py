@@ -35,15 +35,15 @@ data_heading = "downloadAttribute"
 
 data_folders = ["AmbientOcclusion", "Color", "NormalDX", "NormalGL", "Roughness"]
 
-num_data_points = 100
+num_data_points = 500
 
 training_dataset_loader, testing_dataset_loader = None, None
 
-epochs = 1
-batch_size = 5
+epochs = 5
+batch_size = 8
 
-generator_lr = 0.0002
-discriminator_lr = 0.0002
+generator_lr = 0.0001
+discriminator_lr = 0.0001
 beta1 = 0.5
 beta2 = 0.999
 
@@ -51,17 +51,16 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 dataset_mean, dataset_std = 0, 0
 
 if __name__ == '__main__':
-
-    #Download and filter dataset
+    #
     # data_info_request(url=training_data_info_url, output_directory=training_data_info_output)
-
+    #
     # delete_duplicate_rows(csv_file_path=training_data_info_output)
     # filter_data(csv_file_path=training_data_info_output, data_heading=data_heading, data_filter=data_filter)
-
+    #
     # download_dataset(data_info_path=training_data_info_output, data_file_path=training_data_path, data_filter = data_filter, num_data_points=num_data_points)
-
+    #
     # extract_dataset("Data/TrainingRawData", "Data/TrainingImages")
-
+    #
     # paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/NormalDX", "Color_", "NormalDX_")
     #
     # normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
@@ -82,7 +81,6 @@ if __name__ == '__main__':
     dataset_std = values[1]
 
     loader = DataLoader(dataset, shuffle=True)
-    print(dataset_mean, dataset_std)
     #
     # generator = UNet(3) #3 Channels for RGB
     # discriminator = DiscriminatorCNN(3) #3 Channels for RGB
@@ -99,5 +97,3 @@ if __name__ == '__main__':
 
     generator = torch.load("Generator.pt")
     single_pass(model=generator, input_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, print_tensor=True, display_sample=True)
-
-
