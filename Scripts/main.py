@@ -61,15 +61,15 @@ if __name__ == '__main__':
     #
     # extract_dataset("Data/TrainingRawData", "Data/TrainingImages")
 
-    paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/NormalDX", "Color_", "NormalDX_")
-
-    normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
-
-    with open('TrainingData', 'wb') as f:
-        pickle.dump(normalized_data, f)
-
-    with open('TrainingDatsetInfo', 'wb') as f:
-        pickle.dump([dataset_mean, dataset_std], f)
+    # paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/NormalDX", "Color_", "NormalDX_")
+    #
+    # normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
+    #
+    # with open('TrainingData', 'wb') as f:
+    #     pickle.dump(normalized_data, f)
+    #
+    # with open('TrainingDatsetInfo', 'wb') as f:
+    #     pickle.dump([dataset_mean, dataset_std], f)
 
     with open('TrainingData', 'rb') as f:
         dataset = pickle.load(f)
@@ -81,20 +81,20 @@ if __name__ == '__main__':
     dataset_std = values[1]
 
     loader = DataLoader(dataset, shuffle=True)
-
-    generator = UNet(3) #3 Channels for RGB
-    discriminator = DiscriminatorCNN(3) #3 Channels for RGB
-
-    generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
-    discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
-
-    train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, log_interval=1)
-
-    torch.save(generator, "Generator.pt")
-    torch.save(discriminator, "Discriminator.pt")
     #
-    # sample = next(iter(loader))[0]
-    # target = next(iter(loader))[1]
+    # generator = UNet(3) #3 Channels for RGB
+    # discriminator = DiscriminatorCNN(3) #3 Channels for RGB
     #
-    # generator = torch.load("Generator.pt")
-    # single_pass(model=generator, input_tensor=sample, device=device, target_tensor=target, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, display_target=True, print_tensor=True)
+    # generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
+    # discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
+    #
+    # train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, secondary_gen_loss= torch.nn.MSELoss(), secondary_loss_weight=0.3, log_interval=1)
+    #
+    # torch.save(generator, "Generator.pt")
+    # torch.save(discriminator, "Discriminator.pt")
+
+    sample = next(iter(loader))[0]
+    target = next(iter(loader))[1]
+
+    generator = torch.load("Generator.pt")
+    single_pass(model=generator, input_tensor=sample, device=device, target_tensor=target, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, display_target=True, print_tensor=True)

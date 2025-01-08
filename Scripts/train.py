@@ -1,9 +1,9 @@
 import torch
 
-def train_models(epochs, gen, disc, loader, loss_function, disc_optim, gen_optim, device, log_interval=0):
+def train_models(epochs, gen, disc, loader, loss_function, disc_optim, gen_optim, device, secondary_gen_loss = None, secondary_loss_weight = 1, log_interval=0):
     print("\nStarting Training...")
     for epoch in range(epochs):
-        print(f"\nEpoch {epoch }/{epochs}")
+        print(f"\nEpoch {epoch + 1}/{epochs}")
         for batch_idx, (diffuse, real_normal) in enumerate(loader):
 
             diffuse = diffuse.to(device)
@@ -18,6 +18,10 @@ def train_models(epochs, gen, disc, loader, loss_function, disc_optim, gen_optim
             fake_normal = gen(diffuse)
 
             loss_g = loss_function(disc(fake_normal), single_ones_tensor)
+
+            if secondary_gen_loss is not None:
+                loss_g += secondary_loss_weight*secondary_gen_loss(fake_normal, real_normal)
+
             gen.zero_grad()
             loss_g.backward(retain_graph=True)
             gen_optim.step()
@@ -36,7 +40,7 @@ def train_models(epochs, gen, disc, loader, loss_function, disc_optim, gen_optim
             torch.cuda.empty_cache()
 
             if log_interval > 0 and batch_idx % log_interval == 0:
-                print(f"Batch [{batch_idx}/{len(loader)}] "
+                print(f"Batch [{batch_idx+1}/{len(loader)}] "
                       f"Loss_D: {loss_d:.4f} "
                       f"Loss_G: {loss_g:.4f}")
 
