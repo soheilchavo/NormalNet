@@ -56,3 +56,6 @@ def pair_datapoints(n, folder1, folder2, prefix1, prefix2):
                 if data_tensor_1.shape[1] == data_tensor_1.shape[2] and data_tensor_2.shape[1] == data_tensor_2.shape[2]:
                     out.append([data_tensor_1, data_tensor_2])
     return out
+
+def transform_single_png(sample):
+    return img_transform(Image.open(sample))

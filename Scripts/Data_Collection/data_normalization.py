@@ -1,6 +1,30 @@
 from torchvision import transforms
 
 #Takes a dataset as a folder of images and normalizes it
+
+def normalize_sample(datapoint, mean, std, standalone=False):
+
+    if standalone:
+        datapoint = datapoint.float() / 255
+
+    transform1 = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Resize((256,256)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+    ])
+
+    print(datapoint.shape)
+    if datapoint.shape[0] == 4:
+        datapoint = datapoint[:3, :, :]
+
+    datapoint = transform1(datapoint)
+
+    if len(datapoint.shape) == 3:
+        datapoint = datapoint.unsqueeze(0)
+
+    return datapoint
+
 def normalize_data(dataset):
 
     mean = 0.0
@@ -15,17 +39,11 @@ def normalize_data(dataset):
     mean /= len(dataset)*2
     std /= len(dataset)*2
 
-    transform1 = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Resize((256,256)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=mean, std=std),
-    ])
 
     normalized_dataset = []
 
     for datapoint in dataset:
-        normalized_dataset.append([transform1(datapoint[0]), transform1(datapoint[1])])
+        normalized_dataset.append([normalize_sample(datapoint[0], mean, std), normalize_sample(datapoint[1], mean, std)])
 
     return normalized_dataset, mean, std
 

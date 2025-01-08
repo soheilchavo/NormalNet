@@ -12,8 +12,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from Data_Collection.data_collector import data_info_request, download_dataset
-from Data_Collection.data_filtering import delete_duplicate_rows, filter_data, extract_dataset, pair_datapoints
-from Data_Collection.data_normalization import normalize_data
+from Data_Collection.data_filtering import delete_duplicate_rows, filter_data, extract_dataset, pair_datapoints, transform_single_png
+from Data_Collection.data_normalization import normalize_data, normalize_sample
 
 from Models.generator import UNet
 from Models.discriminator import DiscriminatorCNN
@@ -93,8 +93,13 @@ if __name__ == '__main__':
     # torch.save(generator, "Generator.pt")
     # torch.save(discriminator, "Discriminator.pt")
 
-    sample = next(iter(loader))[0]
-    target = next(iter(loader))[1]
+    # sample = next(iter(loader))[0]
+    # target = next(iter(loader))[1]
+
+
+    sample = transform_single_png("TestTexture.png")
+    sample = normalize_sample(sample, dataset_mean, dataset_std, standalone=True)
 
     generator = torch.load("Generator.pt")
-    single_pass(model=generator, input_tensor=sample, device=device, target_tensor=target, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, display_target=True, print_tensor=True)
+    # single_pass(model=generator, input_tensor=sample, device=device, target_tensor=target, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, display_target=True, print_tensor=True)
+    single_pass(model=generator, input_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True)
