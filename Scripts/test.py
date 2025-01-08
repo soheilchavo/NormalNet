@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy
 from Data_Collection.data_normalization import unnormalize_tensor
 
-def single_pass(model, input_tensor, device, dataset_mean=0, dataset_std=0, display_plot=False, print_tensor=False, display_sample=False):
+def single_pass(model, input_tensor, device, dataset_mean=0, dataset_std=0, target_tensor = None, display_plot=False, display_target=False, print_tensor=False, display_sample=False):
 
     model = model.to(device)
     input_tensor = input_tensor.to(device)
@@ -24,6 +24,16 @@ def single_pass(model, input_tensor, device, dataset_mean=0, dataset_std=0, disp
         img = img.clip(0, 1)
         plt.imshow(img.permute(1, 2, 0))
         plt.title("Input Image")
+        plt.show()
+
+    if display_target:
+        target_tensor = target_tensor.squeeze(0)
+        target_tensor = target_tensor.to(torch.device("cpu"))
+        img = target_tensor.detach()
+        img = unnormalize_tensor(img, dataset_mean, dataset_std)
+        img = img.clip(0, 1)
+        plt.imshow(img.permute(1, 2, 0))
+        plt.title("Target Image")
         plt.show()
 
     if display_plot:

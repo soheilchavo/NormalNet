@@ -94,6 +94,7 @@ if __name__ == '__main__':
     # torch.save(discriminator, "Discriminator.pt")
 
     sample = next(iter(loader))[0]
+    target = next(iter(loader))[1]
 
     generator = torch.load("Generator.pt")
-    single_pass(model=generator, input_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, print_tensor=True, display_sample=True)
+    single_pass(model=generator, input_tensor=sample, device=device, target_tensor=target, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, display_target=True, print_tensor=True)
