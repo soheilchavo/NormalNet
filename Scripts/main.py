@@ -102,4 +102,4 @@ if __name__ == '__main__':
 
     generator = torch.load("Generator.pt")
     # single_pass(model=generator, input_tensor=sample, device=device, target_tensor=target, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, display_target=True, print_tensor=True)
-    single_pass(model=generator, input_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True)
+    single_pass(model=generator, input_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, save_plot=True, plot_dir="Generated_Normal.png")
