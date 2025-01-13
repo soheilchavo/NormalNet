@@ -3,6 +3,7 @@ from torch import nn
 
 from Scripts.Models.classes import DoubleConv, UpConv, DownConv
 
+#Simplified U-Net structure (in order to save on training time)
 class UNet(torch.nn.Module):
     def __init__(self, n_channels):
         super(UNet, self).__init__()
@@ -26,5 +27,4 @@ class UNet(torch.nn.Module):
         x6 = self.up2(x4, x1)
 
         x7 = self.final_conv(x6)
-
         return x7

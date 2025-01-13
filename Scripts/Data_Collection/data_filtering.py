@@ -14,6 +14,7 @@ def delete_duplicate_rows(csv_file_path : str, replace_file = True, output_path 
     else:
         df.to_csv(output_path, index=False)
 
+#Only keep datapoints with specific headings
 def filter_data(csv_file_path : str, data_heading : str, data_filter : list[str], replace_file = True, output_path = None):
     df = pandas.read_csv(csv_file_path)
     df = df[df[data_heading].isin(data_filter)]
@@ -22,6 +23,7 @@ def filter_data(csv_file_path : str, data_heading : str, data_filter : list[str]
     else:
         df.to_csv(output_path, index=False)
 
+#Extract zip files to different folders
 def extract_maps(zip_path : str, folder_base_path : str, idx: int):
     with zipfile.ZipFile(zip_path, "r") as f:
         files = f.namelist()
@@ -36,12 +38,14 @@ def extract_maps(zip_path : str, folder_base_path : str, idx: int):
             except FileExistsError:
                 pass
 
+#Go through and extract each zip file
 def extract_dataset(dataset_path: str, output_path : str):
     for idx, filename in enumerate(os.listdir(dataset_path)):
         f = os.path.join(dataset_path, filename)
         if f.endswith(".zip"):
             extract_maps(f, output_path, idx)
 
+#Return a dictionary of corresponding datapoints
 def pair_datapoints(n, folder1, folder2, prefix1, prefix2):
     out = []
     for i in range(n):
@@ -57,5 +61,6 @@ def pair_datapoints(n, folder1, folder2, prefix1, prefix2):
                     out.append([data_tensor_1, data_tensor_2])
     return out
 
+#Returns an image's corresponding tensor
 def transform_single_png(sample):
     return img_transform(Image.open(sample))

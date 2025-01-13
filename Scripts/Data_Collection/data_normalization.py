@@ -1,29 +1,38 @@
 from torchvision import transforms
 
-#Takes a dataset as a folder of images and normalizes it
+def scale_transform_sample(datapoint, standalone=False):
 
-def normalize_sample(datapoint, mean, std, standalone=False):
-
+    #Standalone is true if the function is called on a single image rather than as a part of a dataset
     if standalone:
         datapoint = datapoint.float() / 255
 
+    #Intial Size transform (256, 256) in order to save on processing, images get upscaled later
     transform1 = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize((256,256)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=mean, std=std),
     ])
 
-    print(datapoint.shape)
+    #Removes alpha channel if image has one
     if datapoint.shape[0] == 4:
         datapoint = datapoint[:3, :, :]
 
+    #Size transform
     datapoint = transform1(datapoint)
 
+    #Add batch dimension if single sample doesen't have it
     if len(datapoint.shape) == 3:
         datapoint = datapoint.unsqueeze(0)
 
     return datapoint
+
+def normalize_sample(datapoint, mean, std):
+
+    normal_transform = transforms.Compose([
+        transforms.Normalize(mean=mean, std=std)
+    ])
+
+    return normal_transform(datapoint)
 
 def normalize_data(dataset):
 
@@ -39,11 +48,11 @@ def normalize_data(dataset):
     mean /= len(dataset)*2
     std /= len(dataset)*2
 
-
     normalized_dataset = []
 
     for datapoint in dataset:
-        normalized_dataset.append([normalize_sample(datapoint[0], mean, std), normalize_sample(datapoint[1], mean, std)])
+        scaled_datapoints = [scale_transform_sample(datapoint[0]), scale_transform_sample(datapoint[1])]
+        normalized_dataset.append([normalize_sample(scaled_datapoints[0], mean, std), normalize_sample(scaled_datapoints[1], mean, std)])
 
     return normalized_dataset, mean, std
 

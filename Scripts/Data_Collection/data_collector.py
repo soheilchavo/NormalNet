@@ -26,6 +26,7 @@ def download_dataset(data_info_path : str, data_file_path : str, data_filter : l
     else:
         raise Exception("Data info file not included, run data_info_request() first.")
 
+#Downloads a single zip file
 def download_datapoint(link : str, data_directory : str, file_name : str, mirror_link : str = ""):
     print(f"Downloading {file_name} from {link}")
     response = ""
@@ -36,6 +37,6 @@ def download_datapoint(link : str, data_directory : str, file_name : str, mirror
         try:
             response = requests.get(mirror_link)
         except:
-            print(f"{file_name}, Mirror link is corruped, datapoint not downloaded")
+            print(f"{file_name}, Mirror link is corrupted, datapoint not downloaded")
     if response != "":
         open(f"{data_directory}/{file_name}.zip", "wb").write(response.content)
