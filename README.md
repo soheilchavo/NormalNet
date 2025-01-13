@@ -1,4 +1,4 @@
-![Normal Net](https://github.com/user-attachments/assets/8bd8f983-1eab-4409-948d-fece8f4ea555)
+![Normal Net](https://github.com/user-attachments/assets/efb3e304-b31d-490f-ba48-5b630bb820dd)
 
 ## 🔍 Description
 Normal Net is a project that is designed to transform diffuse images into PBR Maps, currently focused on Normal Maps. Models are trained using PyTorch and a GAN archetecture. The project is being created in order to allow for 3D artists to quickly create photorealistic renders without having to download and store many PBR Materials locally. Currently a Blender Plugin is being created to allow users to seamlessly incorprate the technology into the work.
