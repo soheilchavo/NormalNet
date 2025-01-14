@@ -3,6 +3,7 @@ import zipfile
 import os
 from torchvision import transforms
 from PIL import Image
+import torch
 
 img_transform = transforms.Compose([transforms.PILToTensor()])
 
@@ -63,4 +64,7 @@ def pair_datapoints(n, folder1, folder2, prefix1, prefix2):
 
 #Returns an image's corresponding tensor
 def transform_single_png(sample):
-    return img_transform(Image.open(sample))
+    img = img_transform(Image.open(sample))
+    dim = min(img.shape[1], img.shape[2])
+    square_transform = transforms.Compose([transforms.Resize((dim, dim))])
+    return square_transform(img)

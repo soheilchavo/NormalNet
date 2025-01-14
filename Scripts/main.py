@@ -52,57 +52,58 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 if __name__ == '__main__':
 
-    #Download, pair, and normalize dataset
-    data_info_request(url=training_data_info_url, output_directory=training_data_info_output)
-
-    delete_duplicate_rows(csv_file_path=training_data_info_output)
-    filter_data(csv_file_path=training_data_info_output, data_heading=data_heading, data_filter=data_filter)
-
-    download_dataset(data_info_path=training_data_info_output, data_file_path=training_data_path, data_filter = data_filter, num_data_points=num_data_points)
-    extract_dataset("Data/TrainingRawData", "Data/TrainingImages")
-
-    paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/NormalDX", "Color_", "NormalDX_")
-    normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
-
-    #Save Training Data and Dataset Info
-    with open('Data/TrainingData', 'wb') as f:
-        pickle.dump(normalized_data, f)
-
-    with open('Data/TrainingDatsetInfo', 'wb') as f:
-        pickle.dump([dataset_mean, dataset_std], f)
+    # #Download, pair, and normalize dataset
+    # data_info_request(url=training_data_info_url, output_directory=training_data_info_output)
+    #
+    # delete_duplicate_rows(csv_file_path=training_data_info_output)
+    # filter_data(csv_file_path=training_data_info_output, data_heading=data_heading, data_filter=data_filter)
+    #
+    # download_dataset(data_info_path=training_data_info_output, data_file_path=training_data_path, data_filter = data_filter, num_data_points=num_data_points)
+    # extract_dataset("Data/TrainingRawData", "Data/TrainingImages")
+    #
+    # paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/NormalDX", "Color_", "NormalDX_")
+    # normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
+    #
+    # #Save Training Data and Dataset Info
+    # with open('Data/TrainingData', 'wb') as f:
+    #     pickle.dump(normalized_data, f)
+    #
+    # with open('Data/TrainingDatsetInfo', 'wb') as f:
+    #     pickle.dump([dataset_mean, dataset_std], f)
 
     #Loading code incase dataset is already saved
     # with open('Data/TrainingData', 'rb') as f:
     #     dataset = pickle.load(f)
     #
-    # with open('Data/TrainingDatsetInfo', 'rb') as f:
-    #     values = pickle.load(f)
+    with open('Data/TrainingDatsetInfo', 'rb') as f:
+        values = pickle.load(f)
 
-    # dataset_mean = values[0]
-    # dataset_std = values[1]
+    dataset_mean = values[0]
+    dataset_std = values[1]
 
     # loader = DataLoader(dataset, shuffle=True)
 
-    loader = DataLoader(normalized_data, shuffle=True)
-
     #Create models and optimizers
-    generator = UNet(3) #3 Channels for RGB
-    discriminator = DiscriminatorCNN(3) #3 Channels for RGB
-    generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
-    discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
-
-    train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, secondary_gen_loss= torch.nn.MSELoss(), secondary_loss_weight=0.3, log_interval=1)
-
-    torch.save(generator, "Models/Generator.pt")
-    torch.save(discriminator, "Models/Discriminator.pt")
-
-    #Test of a single sample
+    # generator = UNet(3) #3 Channels for RGB
+    # discriminator = DiscriminatorCNN(3) #3 Channels for RGB
+    # generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
+    # discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
     #
-    # sample = transform_single_png("TestTexture.png")
-    # sample = scale_transform_sample(sample, standalone=True)
+    # train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, secondary_gen_loss= torch.nn.MSELoss(), secondary_loss_weight=0.3, log_interval=1)
     #
-    # torchvision.utils.save_image(sample, "DiffuseDownSample.png")
+    # torch.save(generator, "Models/Generator.pt")
+    # torch.save(discriminator, "Models/Discriminator.pt")
 
-    # generator = torch.load("Generator.pt")
+    # Test of a single sample
+
+    #Transforms a png into a tensor for the model
+    sample = transform_single_png("TestTexture.png")
+
+    #Scales the tensor appropriately
+    down_sample = scale_transform_sample(sample, standalone=True)
+
+    #Load Generator
+    generator = torch.load("Models/Generator.pt")
+
     # single_pass(model=generator, input_tensor=sample, device=device, target_tensor=target, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, display_target=True, print_tensor=True)
-    # single_pass(model=generator, input_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, save_plot=True, plot_dir="GeneratedNormal.png")
+    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, save_plot=True, plot_dir="GeneratedNormal.png")
