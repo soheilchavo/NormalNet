@@ -15,7 +15,7 @@ sample = transform_single_png("TestTexture.png")
 sample = scale_transform_sample(sample, standalone=True)
 
 #Load Generator
-generator = torch.load("Generator.pt")
+generator = torch.load("NormalGenerator.pt")
 
 single_pass(model=generator, input_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True)
 ```
@@ -23,23 +23,25 @@ single_pass(model=generator, input_tensor=sample, device=device, dataset_mean=da
 If you want to download the recommended dataset and save it locally, run the following code and change the parameters to match your local directories:
 
 ```py
-#Download, pair, and normalize dataset
+# Download, pair, and normalize dataset
 data_info_request(url=training_data_info_url, output_directory=training_data_info_output)
 
 delete_duplicate_rows(csv_file_path=training_data_info_output)
 filter_data(csv_file_path=training_data_info_output, data_heading=data_heading, data_filter=data_filter)
 
-download_dataset(data_info_path=training_data_info_output, data_file_path=training_data_path, data_filter = data_filter, num_data_points=num_data_points)
+download_dataset(data_info_path=training_data_info_output, data_file_path=training_data_path, data_filter=data_filter,
+                 num_data_points=num_data_points)
 extract_dataset("Data/TrainingRawData", "Data/TrainingImages")
 
-paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/NormalDX", "Color_", "NormalDX_")
+paired_dataset = pair_datapoints(num_data_points, os.getcwd() + "/Data/TrainingImages/Color",
+                                 os.getcwd() + "/Data/TrainingImages/NormalDX", "Color_", "NormalDX_")
 normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
 
-#Save Training Data and Dataset Info
-with open('Data/TrainingData', 'wb') as f:
+# Save Training Data and Dataset Info
+with open('Data/NormalTrainingData', 'wb') as f:
     pickle.dump(normalized_data, f)
 
-with open('Data/TrainingDatsetInfo', 'wb') as f:
+with open('Data/NormalTrainingDatasetInfo', 'wb') as f:
     pickle.dump([dataset_mean, dataset_std], f)
 ```
 
@@ -56,8 +58,8 @@ discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discrimina
 
 train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, secondary_gen_loss= torch.nn.MSELoss(), secondary_loss_weight=0.3, log_interval=1)
 
-torch.save(generator, "Models/Generator.pt")
-torch.save(discriminator, "Models/Discriminator.pt")
+torch.save(generator, "Models/NormalGenerator.pt")
+torch.save(discriminator, "Models/NormalDiscriminator.pt")
 ```
 
 ## 🚧 Feature Roadmap

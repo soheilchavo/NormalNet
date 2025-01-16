@@ -57,9 +57,12 @@ def pair_datapoints(n, folder1, folder2, prefix1, prefix2):
             data_tensor_1 = img_transform(Image.open(datapoint1))
             data_tensor_2 = img_transform(Image.open(datapoint2))
 
-            if data_tensor_1.shape[0] == 3 and data_tensor_2.shape[0] == 3:
-                if data_tensor_1.shape[1] == data_tensor_1.shape[2] and data_tensor_2.shape[1] == data_tensor_2.shape[2]:
-                    out.append([data_tensor_1, data_tensor_2])
+            if data_tensor_1.shape[1] == data_tensor_1.shape[2] and data_tensor_2.shape[1] == data_tensor_2.shape[2]:
+
+                data_tensor_1 = data_tensor_1.repeat(3, 1, 1) if data_tensor_1.shape[0] < 3 else data_tensor_1
+                data_tensor_2 = data_tensor_2.repeat(3, 1, 1) if data_tensor_2.shape[0] < 3 else data_tensor_2
+
+                out.append([data_tensor_1, data_tensor_2])
     return out
 
 #Returns an image's corresponding tensor

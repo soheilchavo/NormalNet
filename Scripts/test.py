@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from Data_Collection.data_normalization import unnormalize_tensor
 from upsampling import joint_bilateral_up_sample
+import pickle
 
 def single_pass(model, input_tensor, guide_tensor, device, dataset_mean=0, dataset_std=0, target_tensor = None, display_plot=False, display_target=False, print_tensor=False, display_sample=False, save_plot=False, plot_dir=""):
 
@@ -53,3 +54,17 @@ def single_pass(model, input_tensor, guide_tensor, device, dataset_mean=0, datas
     if print_tensor:
         print(result.shape)
         print(result)
+
+def generate_pbr(model_strings, input_tensor, guide_tensor, device, display_plots = True, save_plots=False, save_dir=""):
+
+    for i in model_strings:
+
+        with open(f'Data/{i}TrainingDatasetInfo', 'rb') as f:
+            values = pickle.load(f)
+
+        dataset_mean = values[0]
+        dataset_std = values[1]
+
+        generator = torch.load(f"Models/{i}Generator.pt")
+
+        single_pass(generator, input_tensor, guide_tensor, device, dataset_mean, dataset_std, save_plot=save_plots, plot_dir=save_dir+i+'.png', display_plot=display_plots)

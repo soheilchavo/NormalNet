@@ -21,7 +21,7 @@ def scale_transform_sample(datapoint, standalone=False):
     datapoint = transform1(datapoint)
 
     #Add batch dimension if single sample doesen't have it
-    if len(datapoint.shape) == 3:
+    if standalone and len(datapoint.shape) == 3:
         datapoint = datapoint.unsqueeze(0)
 
     return datapoint

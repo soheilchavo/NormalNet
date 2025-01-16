@@ -1,6 +1,6 @@
 /Data/
 *.png
-Data/TrainingData
+Data/NormalTrainingData
 *.png
 Data/TrainingImages/AmbientOcclusion/AmbientOcclusion_2.png
 Data/TrainingImages/AmbientOcclusion/AmbientOcclusion_4.png
