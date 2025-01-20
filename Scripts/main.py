@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
     #Transforms a png into a tensor for the model
 
-    sample = transform_single_png("TestTexture.png")
+    sample = transform_single_png("Testing/TestTexture.png")
 
     #Scales the tensor appropriately
     down_sample = scale_transform_sample(sample, standalone=True)
@@ -113,4 +113,4 @@ if __name__ == '__main__':
     #Load Generator
     generator = torch.load(f"Models/{current_gen}Generator.pt", map_location=device)
 
-    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=False, save_plot=True, plot_dir=f"{current_gen}.png", print_tensor=True)
+    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=False, save_plot=True, plot_dir=f"Testing/{current_gen}.png", print_tensor=True)
