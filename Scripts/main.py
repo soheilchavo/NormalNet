@@ -41,9 +41,9 @@ num_data_points = 250
 dataset_mean, dataset_std = 0, 0
 
 #Hyper Parameters
-epochs = 5
+epochs = 7
 batch_size = 5
-generator_lr = 0.00002
+generator_lr = 0.0002
 discriminator_lr = 0.00001
 beta1 = 0.5
 beta2 = 0.999
@@ -61,22 +61,22 @@ if __name__ == '__main__':
     # download_dataset(data_info_path=training_data_info_output, data_file_path=training_data_path, data_filter = data_filter, num_data_points=num_data_points)
     # extract_dataset("Data/TrainingRawData", "Data/TrainingImages")
 
-    paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/NormalGL", "Color_", "NormalGL_")
+    paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/Roughness", "Color_", "Roughness_")
 
     normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
 
     # # #Save Training Data and Dataset Info
-    with open('Data/NormalGLTrainingData', 'wb') as f:
+    with open('Data/RoughnessTrainingData', 'wb') as f:
         pickle.dump(normalized_data, f)
 
-    with open('Data/NormalGLTrainingDatasetInfo', 'wb') as f:
+    with open('Data/RoughnessTrainingDatasetInfo', 'wb') as f:
         pickle.dump([dataset_mean, dataset_std], f)
 
     # Loading code incase dataset is already saved
-    with open('Data/NormalGLTrainingData', 'rb') as f:
+    with open('Data/RoughnessTrainingData', 'rb') as f:
         dataset = pickle.load(f)
 
-    with open('Data/NormalGLTrainingDatasetInfo', 'rb') as f:
+    with open('Data/RoughnessTrainingDatasetInfo', 'rb') as f:
         values = pickle.load(f)
 
     dataset_mean = values[0]
@@ -93,8 +93,8 @@ if __name__ == '__main__':
 
     train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, secondary_gen_loss= torch.nn.MSELoss(), secondary_loss_weight=0.7, log_interval=1)
 
-    torch.save(generator, "Models/NormalGLGenerator.pt")
-    torch.save(discriminator, "Models/NormalGLDiscriminator.pt")
+    torch.save(generator, "Models/RoughnessGenerator.pt")
+    torch.save(discriminator, "Models/RoughnessDiscriminator.pt")
 
     # Test of a single sample
 
@@ -110,6 +110,6 @@ if __name__ == '__main__':
     # generate_pbr(model_strings=strings, input_tensor=down_sample, guide_tensor=sample, device=device, save_plots=True, display_plots=True)
 
     #Load Generator
-    generator = torch.load("Models/NormalGLGenerator.pt")
+    generator = torch.load("Models/RoughnessGenerator.pt")
 
-    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, save_plot=True, plot_dir="NormalGL.png", print_tensor=True)
+    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=False, save_plot=True, plot_dir="Roughness.png", print_tensor=True)
