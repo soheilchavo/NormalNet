@@ -49,6 +49,7 @@ beta1 = 0.5
 beta2 = 0.999
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+current_gen = "Roughness"
 
 if __name__ == '__main__':
 
@@ -61,46 +62,46 @@ if __name__ == '__main__':
     # download_dataset(data_info_path=training_data_info_output, data_file_path=training_data_path, data_filter = data_filter, num_data_points=num_data_points)
     # extract_dataset("Data/TrainingRawData", "Data/TrainingImages")
 
-    paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+"/Data/TrainingImages/Roughness", "Color_", "Roughness_")
-
-    normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
+    # paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+f"/Data/TrainingImages/{current_gen}", "Color_", f"{current_gen}_")
+    #
+    # normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
 
     # # #Save Training Data and Dataset Info
-    with open('Data/RoughnessTrainingData', 'wb') as f:
-        pickle.dump(normalized_data, f)
+    # with open(f'Data/{current_gen}TrainingData', 'wb') as f:
+    #     pickle.dump(normalized_data, f)
+    #
+    # with open(f'Data/{current_gen}TrainingDatasetInfo', 'wb') as f:
+    #     pickle.dump([dataset_mean, dataset_std], f)
+    #
+    # # Loading code incase dataset is already saved
+    # with open(f'Data/{current_gen}TrainingData', 'rb') as f:
+    #     dataset = pickle.load(f)
 
-    with open('Data/RoughnessTrainingDatasetInfo', 'wb') as f:
-        pickle.dump([dataset_mean, dataset_std], f)
-
-    # Loading code incase dataset is already saved
-    with open('Data/RoughnessTrainingData', 'rb') as f:
-        dataset = pickle.load(f)
-
-    with open('Data/RoughnessTrainingDatasetInfo', 'rb') as f:
+    with open(f'Data/{current_gen}TrainingDatasetInfo', 'rb') as f:
         values = pickle.load(f)
 
     dataset_mean = values[0]
     dataset_std = values[1]
-
-    loader = DataLoader(dataset, shuffle=True)
+    #
+    # loader = DataLoader(dataset, shuffle=True)
 
     # #Create models and optimizers
-    generator = UNet(3) #3 Channels for RGB
-    discriminator = DiscriminatorCNN(3) #3 Channels for RGB
-
-    generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
-    discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
-
-    train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, secondary_gen_loss= torch.nn.MSELoss(), secondary_loss_weight=0.7, log_interval=1)
-
-    torch.save(generator, "Models/RoughnessGenerator.pt")
-    torch.save(discriminator, "Models/RoughnessDiscriminator.pt")
+    # generator = UNet(3) #3 Channels for RGB
+    # discriminator = DiscriminatorCNN(3) #3 Channels for RGB
+    #
+    # generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
+    # discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
+    #
+    # train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, secondary_gen_loss= torch.nn.MSELoss(), secondary_loss_weight=0.7, log_interval=1)
+    #
+    # torch.save(generator, f"Models/{current_gen}Generator.pt")
+    # torch.save(discriminator, f"Models/{current_gen}Discriminator.pt")
 
     # Test of a single sample
 
     #Transforms a png into a tensor for the model
 
-    sample = transform_single_png("TestTexture.jpg")
+    sample = transform_single_png("TestTexture.png")
 
     #Scales the tensor appropriately
     down_sample = scale_transform_sample(sample, standalone=True)
@@ -110,6 +111,6 @@ if __name__ == '__main__':
     # generate_pbr(model_strings=strings, input_tensor=down_sample, guide_tensor=sample, device=device, save_plots=True, display_plots=True)
 
     #Load Generator
-    generator = torch.load("Models/RoughnessGenerator.pt")
+    generator = torch.load(f"Models/{current_gen}Generator.pt", map_location=device)
 
-    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=False, save_plot=True, plot_dir="Roughness.png", print_tensor=True)
+    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=False, save_plot=True, plot_dir=f"{current_gen}.png", print_tensor=True)
