@@ -33,8 +33,8 @@ def single_pass(model, input_tensor, guide_tensor, device, dataset_mean=0, datas
         plt.show()
 
     if display_sample:
-        input_tensor = input_tensor.squeeze(0)
-        input_tensor = input_tensor.to(torch.device("cpu"))
+        # input_tensor = guide_tensor.squeeze(0)
+        input_tensor = guide_tensor.to(torch.device("cpu"))
         img = input_tensor.detach()
         img = np.transpose(img, (1,2,0))
         plt.imshow(img)
