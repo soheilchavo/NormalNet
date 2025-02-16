@@ -41,15 +41,15 @@ num_data_points = 250
 dataset_mean, dataset_std = 0, 0
 
 #Hyper Parameters
-epochs = 7
+epochs = 1
 batch_size = 5
-generator_lr = 0.0002
+generator_lr = 0.0005
 discriminator_lr = 0.00001
-beta1 = 0.5
+beta1 = 0.6
 beta2 = 0.999
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-current_gen = "Roughness"
+current_gen = "Displacement"
 
 if __name__ == '__main__':
 
@@ -65,15 +65,15 @@ if __name__ == '__main__':
     # paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+f"/Data/TrainingImages/{current_gen}", "Color_", f"{current_gen}_")
     #
     # normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
-
+    #
     # # #Save Training Data and Dataset Info
     # with open(f'Data/{current_gen}TrainingData', 'wb') as f:
     #     pickle.dump(normalized_data, f)
     #
     # with open(f'Data/{current_gen}TrainingDatasetInfo', 'wb') as f:
     #     pickle.dump([dataset_mean, dataset_std], f)
-    #
-    # # Loading code incase dataset is already saved
+
+    # Loading code incase dataset is already saved
     # with open(f'Data/{current_gen}TrainingData', 'rb') as f:
     #     dataset = pickle.load(f)
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     #
     # loader = DataLoader(dataset, shuffle=True)
 
-    # #Create models and optimizers
+    #Create models and optimizers
     # generator = UNet(3) #3 Channels for RGB
     # discriminator = DiscriminatorCNN(3) #3 Channels for RGB
     #
@@ -101,16 +101,16 @@ if __name__ == '__main__':
 
     #Transforms a png into a tensor for the model
 
-    sample = transform_single_png("Testing/TestTexture.png")
+    sample = transform_single_png("Testing/TestTexture.jpg")
 
-    #Scales the tensor appropriately
+    # Scales the tensor appropriately
     down_sample = scale_transform_sample(sample, standalone=True)
 
     # strings = ["NormalGL", "Roughness", "Metalness", "Displacement", "AO"]
 
     # generate_pbr(model_strings=strings, input_tensor=down_sample, guide_tensor=sample, device=device, save_plots=True, display_plots=True)
 
-    #Load Generator
+    # Load Generator
     generator = torch.load(f"Models/{current_gen}Generator.pt", map_location=device)
 
-    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=False, save_plot=True, plot_dir=f"Testing/{current_gen}.png", print_tensor=True)
+    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, save_plot=True, plot_dir=f"Testing/{current_gen}.png", print_tensor=True)

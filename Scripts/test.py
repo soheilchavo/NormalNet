@@ -24,10 +24,12 @@ def single_pass(model, input_tensor, guide_tensor, device, dataset_mean=0, datas
     if guide_tensor.shape[0] == 4:
         guide_tensor = guide_tensor[:3, :, :]
 
+    if result[0].mean() > 1:
+        result /= 255
+
     result = joint_bilateral_up_sample(result, guide_tensor, save_img=save_plot, output_path=plot_dir)
 
     if display_plot:
-
         plt.imshow(result)
         plt.title("Generated Map")
         plt.show()
