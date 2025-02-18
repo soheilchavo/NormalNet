@@ -1,9 +1,10 @@
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-from Data_Collection.data_normalization import unnormalize_tensor
-from upsampling import joint_bilateral_up_sample
 import pickle
+from Data_Collection.data_normalization import unnormalize_tensor, scale_transform_sample
+from Data_Collection.data_filtering import transform_single_png
+from Scripts.upsampling import joint_bilateral_up_sample
 
 def single_pass(model, input_tensor, guide_tensor, device, dataset_mean=0, dataset_std=0, target_tensor = None, display_plot=False, display_target=False, print_tensor=False, display_sample=False, save_plot=False, plot_dir=""):
 
@@ -67,3 +68,24 @@ def generate_pbr(model_strings, input_tensor, guide_tensor, device, display_plot
         generator = torch.load(f"Models/{i}Generator.pt")
 
         single_pass(generator, input_tensor, guide_tensor, device, dataset_mean, dataset_std, save_plot=save_plots, plot_dir=save_dir+i+'.png', display_plot=display_plots)
+
+def test_single_sample(sample_dir, gen_type, device, display_plot=False, display_sample=False, save_plot=True, plot_dir="", print_tensor=False):
+
+    sample = transform_single_png(sample_dir)
+
+    down_sample = scale_transform_sample(sample, standalone=True)
+
+    generator = torch.load(f"Models/{gen_type}Generator.pt", map_location=device)
+
+    with open(f'Data/{gen_type}TrainingDatasetInfo', 'rb') as f:
+        values = pickle.load(f)
+
+    dataset_mean = values[0]
+    dataset_std = values[1]
+
+    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=display_plot, display_sample=display_sample, save_plot=save_plot, plot_dir=plot_dir, print_tensor=print_tensor)
+
+def load_gan(gen_path, disc_path, device):
+    generator = torch.load(gen_path, map_location=device)
+    discriminator = torch.load(disc_path, map_location=device)
+    return generator, discriminator

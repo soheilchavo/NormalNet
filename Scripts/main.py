@@ -1,116 +1,58 @@
 #This Project was Created using Photogrammetry PBR's from ambientCG.com,
 #licensed under the Creative Commons CC0 1.0 Universal License.
 
-#Imports
-import os.path
-
 import torch.optim
-import pickle
-
-import torchvision
-from fontTools.merge.util import first
-from torch.utils.data import DataLoader
-
-import numpy as np
-import matplotlib.pyplot as plt
-
-from Data_Collection.data_collector import data_info_request, download_dataset
-from Data_Collection.data_filtering import delete_duplicate_rows, filter_data, extract_dataset, pair_datapoints, transform_single_png
-from Data_Collection.data_normalization import normalize_data, normalize_sample, scale_transform_sample
-
-from Models.generator import UNet
-from Models.discriminator import DiscriminatorCNN
-from train import train_models
-from test import single_pass, generate_pbr
+from Scripts.Data_Collection.data_collector import get_dataset, load_paired_data
+from Scripts.test import test_single_sample, load_gan
+from Scripts.train import train_gan
+import os
 
 #URL's and output directories for getting training and testing data (CSV of all materials and download links)
 training_data_info_url = "https://ambientCG.com/api/v2/downloads_csv?method=PBRPhotogrammetry&type=Material&sort=Popular"
 testing_data_info_url = ""
 training_data_info_output = "Data/training_data_info"
 testing_data_info_output = "Data/testing_data_info"
-training_data_path = "Data/TrainingRawData"
-testing_data_path = "Data/TestingRawData"
+training_raw_data_path = "Data/TrainingRawData"
+testing_raw_data_path = "Data/TestingRawData"
+training_data_path = "Data/TrainingImages"
+testing_data_path = "Data/TestingImages"
 
-#Downloaded must have the following data types
+#Variables for filtering dataset
 data_filter = ["1K-PNG"]
 data_heading = "downloadAttribute"
-data_folders = ["AmbientOcclusion", "Color", "NormalDX", "NormalGL", "Roughness"]
+data_types = ["AmbientOcclusion", "Color", "NormalDX", "NormalGL", "Roughness"]
 
 #Parameters
 num_data_points = 250
 dataset_mean, dataset_std = 0, 0
+gen_channels = 3
+disc_channels = 3
+secondary_gen_loss = torch.nn.MSELoss()
+secondary_gen_loss_weight = 0.75
 
 #Hyper Parameters
 epochs = 1
 batch_size = 5
-generator_lr = 0.0005
+generator_lr = 0.0001
 discriminator_lr = 0.00001
-beta1 = 0.6
-beta2 = 0.999
+gen_betas = (0.5, 0.999)
+disc_betas = (0.5, 0.999)
+log_interval = 1
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#The type of generator trained for (NormalGL, Displacement, Roughness, Metalness, or AO)
 current_gen = "Displacement"
+
+gen_path = f"Models/{current_gen}Generator.pt"
+disc_path = f"Models/{current_gen}Discriminator.pt"
 
 if __name__ == '__main__':
 
-    # #Download, pair, and normalize dataset
-    # data_info_request(url=training_data_info_url, output_directory=training_data_info_output)
-    #
-    # delete_duplicate_rows(csv_file_path=training_data_info_output)
-    # filter_data(csv_file_path=training_data_info_output, data_heading=data_heading, data_filter=data_filter)
-    #
-    # download_dataset(data_info_path=training_data_info_output, data_file_path=training_data_path, data_filter = data_filter, num_data_points=num_data_points)
-    # extract_dataset("Data/TrainingRawData", "Data/TrainingImages")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # get_dataset(training_data_info_url, training_data_info_output, training_raw_data_path, data_heading, data_filter, num_data_points, "Data/TrainingRawImages", "Data/TrainingImages", print_result=False)
 
-    # paired_dataset = pair_datapoints(num_data_points, os.getcwd()+"/Data/TrainingImages/Color", os.getcwd()+f"/Data/TrainingImages/{current_gen}", "Color_", f"{current_gen}_")
-    #
-    # normalized_data, dataset_mean, dataset_std = normalize_data(paired_dataset)
-    #
-    # # #Save Training Data and Dataset Info
-    # with open(f'Data/{current_gen}TrainingData', 'wb') as f:
-    #     pickle.dump(normalized_data, f)
-    #
-    # with open(f'Data/{current_gen}TrainingDatasetInfo', 'wb') as f:
-    #     pickle.dump([dataset_mean, dataset_std], f)
+    loader, dataset_mean, dataset_std = load_paired_data(num_data_points, os.getcwd()+"/"+training_data_path+"/Color", os.getcwd()+"/"+training_data_path+f"/{current_gen}", "Color_", f"{current_gen}_")
 
-    # Loading code incase dataset is already saved
-    # with open(f'Data/{current_gen}TrainingData', 'rb') as f:
-    #     dataset = pickle.load(f)
+    generator, discriminator = train_gan(data_loader=loader, device=device, secondary_gen_loss=secondary_gen_loss, secondary_gen_loss_weight=secondary_gen_loss_weight, epochs=epochs, generator_lr=generator_lr, discriminator_lr=discriminator_lr, generator_betas=gen_betas, discriminator_betas=disc_betas, generator_channels=gen_channels, discriminator_channels=disc_channels, save_models=False, generator_path=gen_path, discriminator_path=disc_path, log_interval=log_interval)
+    # generator, discriminator = load_gan(gen_path, disc_path, device)
 
-    with open(f'Data/{current_gen}TrainingDatasetInfo', 'rb') as f:
-        values = pickle.load(f)
-
-    dataset_mean = values[0]
-    dataset_std = values[1]
-    #
-    # loader = DataLoader(dataset, shuffle=True)
-
-    #Create models and optimizers
-    # generator = UNet(3) #3 Channels for RGB
-    # discriminator = DiscriminatorCNN(3) #3 Channels for RGB
-    #
-    # generator_optim = torch.optim.Adam(generator.parameters(), lr=generator_lr, betas=(beta1, beta2))
-    # discriminator_optim = torch.optim.Adam(discriminator.parameters(), lr=discriminator_lr, betas=(beta1, beta2))
-    #
-    # train_models(epochs, generator, discriminator, loader, torch.nn.BCEWithLogitsLoss(), generator_optim, discriminator_optim, device, secondary_gen_loss= torch.nn.MSELoss(), secondary_loss_weight=0.7, log_interval=1)
-    #
-    # torch.save(generator, f"Models/{current_gen}Generator.pt")
-    # torch.save(discriminator, f"Models/{current_gen}Discriminator.pt")
-
-    # Test of a single sample
-
-    #Transforms a png into a tensor for the model
-
-    sample = transform_single_png("Testing/TestTexture.jpg")
-
-    # Scales the tensor appropriately
-    down_sample = scale_transform_sample(sample, standalone=True)
-
-    # strings = ["NormalGL", "Roughness", "Metalness", "Displacement", "AO"]
-
-    # generate_pbr(model_strings=strings, input_tensor=down_sample, guide_tensor=sample, device=device, save_plots=True, display_plots=True)
-
-    # Load Generator
-    generator = torch.load(f"Models/{current_gen}Generator.pt", map_location=device)
-
-    single_pass(model=generator, input_tensor=down_sample, guide_tensor=sample, device=device, dataset_mean=dataset_mean, dataset_std=dataset_std, display_plot=True, display_sample=True, save_plot=True, plot_dir=f"Testing/{current_gen}.png", print_tensor=True)
+    test_single_sample(sample_dir="Testing/TestTexture.png", gen_type=current_gen, device=device, display_plot=True, display_sample=True, save_plot=True, plot_dir=f"Testing/{current_gen}.png", print_tensor=True)
