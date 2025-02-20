@@ -64,6 +64,7 @@ torch.save(discriminator, "Models/NormalDiscriminator.pt")
 
 ## 🚧 Feature Roadmap
 
-- ✨ Size Generalization (Handling any size image)
-- ✨ Bump, Displacement, Roughness, and Metallic Generators
-- ✨ Blender Plugin
+- ✅ ~~Size Generalization (Handling any size image)~~
+- ✅ ~~Bump, Displacement, Roughness, and Metallic Generators~~
+- ✅ ~~Blender Plugin~~
+- ✨ Create functionality for non-square textures
