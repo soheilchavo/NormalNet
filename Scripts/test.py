@@ -69,13 +69,11 @@ def generate_pbr(model_strings, input_tensor, guide_tensor, device, display_plot
 
         single_pass(generator, input_tensor, guide_tensor, device, dataset_mean, dataset_std, save_plot=save_plots, plot_dir=save_dir+i+'.png', display_plot=display_plots)
 
-def test_single_sample(sample_dir, gen_type, device, display_plot=False, display_sample=False, save_plot=True, plot_dir="", print_tensor=False):
+def test_single_sample(sample_dir, gen_type, generator, device, display_plot=False, display_sample=False, save_plot=True, plot_dir="", print_tensor=False):
 
     sample = transform_single_png(sample_dir)
 
     down_sample = scale_transform_sample(sample, standalone=True)
-
-    generator = torch.load(f"Models/{gen_type}Generator.pt", map_location=device)
 
     with open(f'Data/{gen_type}TrainingDatasetInfo', 'rb') as f:
         values = pickle.load(f)
