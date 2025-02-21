@@ -1,8 +1,12 @@
 import torch
 from Models.generator import UNet
 from Models.discriminator import DiscriminatorCNN
+import matplotlib.pyplot as plt
 
-def train_models(epochs, gen, disc, loader, loss_function, disc_optim, gen_optim, device, secondary_gen_loss = None, secondary_loss_weight = 1, log_interval=0):
+generator_losses = []
+discriminator_losses = []
+
+def train_models(epochs, gen, disc, loader, loss_function, disc_optim, gen_optim, device, secondary_gen_loss = None, secondary_loss_weight = 1, log_interval=0, track_losses=True, print_losses=True, plot_losses=True):
     print("\nStarting Training...")
 
     #Load models to either CPU or GPU based on device
@@ -46,12 +50,17 @@ def train_models(epochs, gen, disc, loader, loss_function, disc_optim, gen_optim
             loss_d_fake = loss_function(disc_fake, single_zeroes_tensor)
             loss_d = (loss_d_real + loss_d_fake)/2
 
+
             #Update Discriminator gradient and take a step
             disc.zero_grad()
             loss_d.backward(retain_graph=True)
             disc_optim.step()
 
             torch.cuda.empty_cache()
+
+            if track_losses:
+                generator_losses.append(loss_g.item())
+                discriminator_losses.append(loss_d.item())
 
             #Log changes if on interval
             if log_interval > 0 and batch_idx % log_interval == 0:
@@ -60,6 +69,22 @@ def train_models(epochs, gen, disc, loader, loss_function, disc_optim, gen_optim
                       f"Loss_G: {loss_g:.4f}")
 
     print("\nTraining Finished.")
+
+    if print_losses:
+        print("Generator Losses:\n")
+        for i in generator_losses:
+            print(f"{i}")
+        print("Discriminator Losses:\n")
+        for i in discriminator_losses:
+            print(f"{i}")
+    if plot_losses:
+        plt.title("Generator Loss [red] vs. Discriminator Loss [blue]")
+        plt.xlabel("Bath #")
+        plt.ylabel("Loss")
+        plt.plot(generator_losses, color="red", label="Generator Loss")
+        plt.plot(discriminator_losses, color="blue", label="Discriminator Loss")
+        plt.show()
+
 
 def train_gan(data_loader, device, secondary_gen_loss, secondary_gen_loss_weight, epochs, generator_lr, discriminator_lr, generator_betas, discriminator_betas, generator_channels=3, discriminator_channels=3, save_models=False, generator_path="", discriminator_path="", log_interval=1):
 

@@ -33,21 +33,26 @@ secondary_gen_loss_weight = 0.75
 #Hyper Parameters
 epochs = 1
 batch_size = 5
-generator_lr = 0.0001
+generator_lr = 0.00001
 discriminator_lr = 0.00001
 gen_betas = (0.5, 0.999)
 disc_betas = (0.5, 0.999)
 log_interval = 1
 
 #The type of generator trained for (NormalGL, Displacement, Roughness, Metalness, or AO)
-current_gen = "Displacement"
+current_gen = "NormalGL"
 
 gen_path = f"Models/{current_gen}Generator.pt"
 disc_path = f"Models/{current_gen}Discriminator.pt"
 
 if __name__ == '__main__':
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = "cpu"
+    if torch.cuda.is_available():
+        device = "cuda"
+    if torch.backends.mps.is_available():
+        device = "mps"
+
     # get_dataset(training_data_info_url, training_data_info_output, training_raw_data_path, data_heading, data_filter, num_data_points, "Data/TrainingRawImages", "Data/TrainingImages", print_result=False)
 
     loader, dataset_mean, dataset_std = load_paired_data(num_data_points, os.getcwd()+"/"+training_data_path+"/Color", os.getcwd()+"/"+training_data_path+f"/{current_gen}", "Color_", f"{current_gen}_")
