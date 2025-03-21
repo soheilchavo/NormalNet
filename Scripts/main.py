@@ -24,18 +24,20 @@ data_heading = "downloadAttribute"
 data_types = ["AmbientOcclusion", "Color", "NormalDX", "NormalGL", "Roughness"]
 
 #Parameters
-num_data_points = 500
+num_data_points = 200
 dataset_mean, dataset_std = 0, 0
 gen_channels = 3
 disc_channels = 3
-primary_loss_weight = 1
+
+
+primary_loss_weight = 300
 secondary_gen_loss = torch.nn.MSELoss()
-secondary_gen_loss_weight = 0.8
+secondary_gen_loss_weight = 890.0
 std_loss = True
-std_loss_weight = 0.5
+std_loss_weight = 500
 
 #Hyper Parameters
-epochs = 2
+epochs = 1
 batch_size = 5
 generator_lr = 0.00001
 discriminator_lr = 0.00001
@@ -44,14 +46,13 @@ disc_betas = (0.5, 0.999)
 log_interval = 1
 
 #The type of generator trained for (NormalGL, Displacement, Roughness, Metalness, or AO)
-current_gen = "Roughness"
+current_gen = "Displacement"
 
 gen_path = f"Models/{current_gen}Generator.pt"
 gen_state_dict_path = f"ModelsWStateDict/{current_gen}_SD.pt"
 disc_path = f"Models/{current_gen}Discriminator.pt"
 
-def save_state_dict(model_path, output_path):
-    model = torch.load(model_path, map_location=device)
+def save_state_dict(model, output_path):
     torch.save(model.state_dict(), output_path)
 
 if __name__ == '__main__':
@@ -72,6 +73,6 @@ if __name__ == '__main__':
     generator, discriminator = train_gan(data_loader=loader, device=device, secondary_gen_loss=secondary_gen_loss, primary_loss_weight=primary_loss_weight, secondary_gen_loss_weight=secondary_gen_loss_weight, epochs=epochs, generator_lr=generator_lr, discriminator_lr=discriminator_lr, generator_betas=gen_betas, discriminator_betas=disc_betas, std_loss=std_loss, std_loss_weight=std_loss_weight, generator_channels=gen_channels, discriminator_channels=disc_channels, save_models=True, generator_path=gen_path, discriminator_path=disc_path, log_interval=log_interval)
     # generator, discriminator = load_gan(gen_path, disc_path, device)
 
-    save_state_dict(gen_path, gen_state_dict_path)
+    save_state_dict(generator, gen_state_dict_path)
 
     test_single_sample(sample_dir="Testing/TestTexture.png", generator=generator, gen_type=current_gen, device=device, display_plot=True, display_sample=True, save_plot=True, plot_dir=f"Testing/{current_gen}.png", print_tensor=True)
